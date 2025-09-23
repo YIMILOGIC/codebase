@@ -129,3 +129,102 @@ class Solution:
                     res[d[cur]] = num
             stack.append(num)
         return res
+
+    # LC 1827
+    def minOperations(self, nums: List[int]) -> int:
+        if not nums:
+            return -1
+        res = 0
+        n = len(nums)
+        for i in range(1, n):
+            diff = nums[i] - nums[i-1]
+            if nums[i] - nums[i-1] <= 0:
+                nums[i] = nums[i-1] + 1
+                res += (-diff + 1)
+        return res
+
+    # LC 238. Product of Array Except Self
+    # TC: O(N) SC: O(N)
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        res = [0] * n
+        left = [0] * n
+        right = [0] * n
+
+        left[0] = right[-1] = 1
+        for i in range(1, n):
+            left[i] = left[i-1] * nums[i-1]
+        for i in range(n-2, -1, -1):
+            right[i] = right[i+1] * nums[i+1]
+        for i in range(n):
+            res[i] = left[i] * right[i]
+        return res
+
+    # LC 36. Valid Sudoku
+    # TC: O(N**2) SC: O(N)
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+        if not board or not board[0]:
+            return False
+        m, n = len(board), len(board[0])
+        if m != n:
+            return False
+        
+        for i in range(m):
+            visited = set()
+            for j in range(m):
+                if board[i][j] != ".":
+                    val = int(board[i][j])
+                    if val not in visited:
+                        visited.add(val)
+                    else:
+                        return False
+        
+        for i in range(n):
+            visited = set()
+            for j in range(m):
+                if board[j][i] != ".":
+                    val = int(board[j][i])
+                    if val not in visited:
+                        visited.add(val)
+                    else:
+                        return False
+        
+        for i in range(0, m, 3):
+            for j in range(0, n, 3):
+                visited = set()
+                for x in range(3):
+                    for y in range(3):
+                        if board[i+x][j+y] != '.':
+                            val = int(board[i+x][j+y])
+                            if val not in visited:
+                                visited.add(val)
+                            else:
+                                return False
+        return True
+
+    # LC 236. Lowest Common Ancestor of a Binary Tree
+    # TC: O(N) SC: O(H) N is number of nodes in tree and H is the height of the tree
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def lca_helper(root, p, q):
+            if not root or root == p or root == q:
+                return root
+            left = lca_helper(root.left, p, q)
+            right = lca_helper(root.right, p, q)
+            if left and right:
+                return root
+            if left:
+                return left
+            if right:
+                return right
+            return None
+        
+        if not root:
+            return root
+        lca = lca_helper(root, p, q)
+        if lca == p:
+            if lca_helper(p, q, q) == q:
+                return p
+        elif lca == q:
+            if lca_helper(q, p, p) == p:
+                return q
+        return lca
