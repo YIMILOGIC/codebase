@@ -364,3 +364,88 @@ class Solution:
             nums1[j] = nums2[j]
             j -= 1
             
+    # LC 424. Longest Repeating Character Replacement
+    # TC: O(N) SC: O(1)
+    # sliding window, two pointers, the length of window is never reduced.
+    # no need to update cur_max after i moved: if there is a longer results, there must be a larger cur_max
+    def characterReplacement(self, s: str, k: int) -> int:
+        i, j = 0, 0
+        ch_freq = [0] * 26
+        cur_max = 0
+        res = 0
+
+        while j < len(s):
+            idx = ord(s[j]) - ord('A')
+            ch_freq[idx] += 1
+            cur_max = max(cur_max, ch_freq[idx])
+            if cur_max + k < j - i + 1:
+                idx = ord(s[i]) - ord('A')
+                ch_freq[idx] -= 1
+                i += 1
+            res = max(res, j - i + 1)
+            j += 1
+        return res
+
+    # LC 88. Merge Sorted Array
+    # TC: O(N) SC: O(1)
+    # merge two arrays from the end so no extra space is needed
+    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+        """
+        Do not return anything, modify nums1 in-place instead.
+        """
+        k = m + n - 1
+        j = n - 1
+        i = m - 1
+        while i >= 0 and j >= 0:
+            if nums1[i] >= nums2[j]:
+                nums1[k] = nums1[i]
+                i -= 1
+            else:
+                nums1[k] = nums2[j]
+                j -= 1
+            k -= 1
+        while j >= 0:
+            nums1[j] = nums2[j]
+            j -= 1
+            
+    # LC 567. Permutation in String
+    # TC: O(len(s2)) SC: O(26) = O(1)
+    # also can use a array of size 26 for the hashmap
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+        n1 = len(s1)
+        n2 = len(s2)
+        if n2 < n1:
+            return False
+        c1 = Counter(s1)
+        c2 = Counter(s2[:n1])
+        if c1 == c2:
+            return True
+        for i in range(n1, n2):
+            c2[s2[i-n1]] -= 1
+            c2[s2[i]] += 1
+            if c1 == c2:
+                return True
+        return False
+
+    # LC 875. Koko Eating Bananas
+    # TC: O(NlogM) SC: O(1) N is the size of input array piles, m is the largest number of bananas in a single pile in piles.
+    # Binary search
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        def hours_to_finish(piles, k):
+            hours = 0
+            for p in piles:
+                cur_hour = p // k if p % k == 0 else p // k + 1
+                hours += cur_hour
+            return hours
+
+
+        left = 1 
+        right = max(piles)
+        while left < right:
+            mid = left + (right - left) // 2
+            hours = hours_to_finish(piles, mid)
+            if hours <= h:
+                right = mid
+            else:
+                left = mid + 1
+        return left
