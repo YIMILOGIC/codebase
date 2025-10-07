@@ -449,3 +449,286 @@ class Solution:
             else:
                 left = mid + 1
         return left
+
+    # LC 239. Sliding Window Maximum
+    # TC: O(N), SC: O(k)
+    # monotonic deque
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        if not nums or k == 0:
+            return []
+        dq = deque()
+        res = []
+        # initialize deque
+        for i in range(k):
+            while dq and dq[-1] < nums[i]:
+                dq.pop()
+            dq.append(nums[i])
+        res.append(dq[0])
+        # process the rest
+        for i in range(k, len(nums)):
+            if dq[0] == nums[i - k]:
+                dq.popleft()
+            while dq and dq[-1] < nums[i]:
+                dq.pop()
+            dq.append(nums[i])
+            res.append(dq[0])
+        return res
+
+    # LC 162. Find Peak Element
+    # TC: O(logN), SC: O(1)
+    # compare nums[mid] with nums[mid+1]
+    def findPeakElement(self, nums: List[int]) -> int:
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] > nums[mid + 1]:
+                right = mid
+            else:
+                left = mid + 1
+        return left
+
+    # LC 680. Valid Palindrome II
+    # TC: O(N), SC: O(1). check_valid() is called only twice
+    def validPalindrome(self, s: str) -> bool:
+        def check_valid(s, i, j):
+            while i < j:
+                if s[i] != s[j]:
+                    return False
+                i += 1
+                j -= 1
+            return True
+        
+        i, j = 0, len(s) - 1
+        while i < j:
+            if s[i] != s[j]:
+                return check_valid(s, i, j-1) or check_valid(s, i+1, j)
+            i += 1
+            j -= 1
+        return True
+
+    # LC 215. Kth Largest Element in an Array
+    # TC: O(Nlogk) SC:O(k)
+    def findKthLargestMinHeap(self, nums: List[int], k: int) -> int:
+        pq = []
+        for num in nums:
+            heapq.heappush(pq, num)
+            if len(pq) > k:
+                heapq.heappop(pq)
+        return pq[0]
+
+    # LC 215. Kth Largest Element in an Array
+    # TC: O(N), SC: O(1)
+    # quick select
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        def quick_select(nums, left, right, k):
+            pivot = nums[right]
+            l = left
+            r = right
+            i = left
+            while i <= r:
+                if nums[i] < pivot:
+                    nums[l], nums[i] = nums[i], nums[l]
+                    l += 1
+                    i += 1
+                elif nums[i] > pivot:
+                    nums[i], nums[r] = nums[r], nums[i]
+                    r -= 1
+                else:
+                    i += 1
+            n_small = l - left
+            n_large = right - r
+            n_equal = r - l + 1
+            if k <= n_large:
+                return quick_select(nums, r + 1, right, k)
+            elif k > n_large + n_equal:
+                return quick_select(nums, left, l - 1, k - n_large - n_equal)
+            else:
+                return pivot
+
+        return quick_select(nums, 0, len(nums) - 1, k)
+
+    # LC 236. Lowest Common Ancestor of a Binary Tree
+    # TC: O(N), SC: O(H), where H is the height of the tree
+    # Definition for a binary tree node.
+    # class TreeNode:
+    #     def __init__(self, x):
+    #         self.val = x
+    #         self.left = None
+    #         self.right = None
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def lca_helper(root, p, q):
+            if not root or root == p or root == q:
+                return root
+            left = lca_helper(root.left, p, q)
+            right = lca_helper(root.right, p, q)
+            if left and right:
+                return root
+            elif left:
+                return left
+            elif right:
+                return right
+            else:
+                return None
+
+        if not root:
+            return None
+        lca = lca_helper(root, p, q)
+        if lca == p:
+            if lca_helper(root, q, q) == q:
+                return p
+        elif lca == q:
+            if lca_helper(root, p, p) == p:
+                return q
+        return lca
+
+    # LC 1650. Lowest Common Ancestor of a Binary Tree III
+    # TC: O(H), SC: O(1)
+    # compute height, go along the lower node to the same height of the higher node, then follow parent and compare
+    def lowestCommonAncestorIII(self, p: 'Node', q: 'Node') -> 'Node':
+        def height(node):
+            h = 0 
+            cur = node
+            while cur:
+                h += 1
+                cur = cur.parent
+            return h
+        hp = height(p)
+        hq = height(q)
+        print(hp, hq)
+        low = p
+        high = q
+        if hp < hq:
+            low = q
+            high = p
+        diff = abs(hp - hq)
+        
+        while diff > 0 and low:
+            low = low.parent
+            diff -= 1
+        print(low.val, high.val)
+        while low and high:
+            if low == high:
+                return low
+            low = low.parent
+            high = high.parent
+        return None
+
+    # LC 314. Binary Tree Vertical Order Traversal
+    # TC: O(N), SC:O(N)
+    # BFS and save column number
+    def verticalOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        visited = defaultdict(list)
+        q = deque()
+        if root:
+            q.append((root, 0))
+        min_col = float("inf")
+        max_col = float("-inf")
+        while q:
+            node, col = q.popleft()
+            visited[col].append(node.val)
+            min_col = min(min_col, col)
+            max_col = max(max_col, col)
+            if node.left:
+                q.append((node.left, col - 1))
+            if node.right:
+                q.append((node.right, col + 1))
+        res = []
+        if len(visited) != 0:
+            for i in range(min_col, max_col + 1):
+                if i in visited:
+                    res.append(visited[i])
+        return res
+
+    # LC 1249. Minimum Remove to Make Valid Parentheses
+    # TC: O(N), SC: O(N)
+    # two pass: remove invalid symbol forward and backward
+    def minRemoveToMakeValid(self, s: str) -> str:
+        def delete_invalid(s: str, open_symbol: str, close_symbol):
+            res = []
+            balance = 0
+            for c in s:
+                if c == open_symbol:
+                    balance += 1
+                if c == close_symbol:
+                    if balance == 0:
+                        continue
+                    balance -= 1
+                res.append(c)
+            return "".join(res)
+        res = delete_invalid(s, "(", ")")
+        res = delete_invalid(res[::-1], ")", "(")
+        return res[::-1]
+
+    # LC 938. Range Sum of BST
+    # TC: O(N), SC:O(H)
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+        def helper(root, low, high, res):
+            if not root:
+                return
+            if root.val > high:
+                helper(root.left, low, high, res)
+            elif root.val < low:
+                helper(root.right, low, high, res)
+            else:
+                res[0] += root.val
+                helper(root.left, low, high, res)
+                helper(root.right, low, high, res)
+        
+        res = [0]
+        helper(root, low, high, res)
+        return res[0]
+
+    # LC 973. K Closest Points to Origin
+    # TC: O(N), SC: O(k)
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+        pq = []
+        for p in points:
+            dist = p[0] ** 2 + p[1] ** 2
+            heapq.heappush(pq, (-dist, p))
+            if len(pq) > k:
+                heapq.heappop(pq)
+        res = [x[1] for x in pq]
+        return res
+
+    # LC 408. Valid Word Abbreviation
+    # TC: O(N), O(1)
+    def validWordAbbreviation(self, word: str, abbr: str) -> bool:
+        i = 0
+        j = 0
+        while i < len(word) and j < len(abbr):
+            if abbr[j].isalpha():
+                if word[i] == abbr[j]:
+                    i += 1
+                    j += 1
+                else:
+                    return False
+            elif abbr[j].isdigit():
+                if abbr[j] == '0':
+                    return False
+                start = j
+                while j < len(abbr) and abbr[j].isdigit():
+                    j += 1
+                digit = abbr[start : j]
+                print(digit)
+                n = int(digit)
+                i += n
+                
+        if i == len(word) and j == len(abbr):
+            return True
+        return False
+
+    # LC
+    # TC: O(logN), SC: O(logN). The max depth of recursive stack is logN.
+    def myPow(self, x: float, n: int) -> float:
+        def helper(x, n):
+            if n == 0:
+                return 1
+            if n < 0:
+                return helper(1/x, -n)
+            if n % 2 == 1:
+                tmp = helper(x, (n - 1) // 2)
+                return x * tmp * tmp
+            if n % 2 == 0:
+                tmp = helper(x, n // 2)
+                return tmp * tmp
+        return helper(x, n)
