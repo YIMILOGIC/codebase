@@ -717,7 +717,7 @@ class Solution:
             return True
         return False
 
-    # LC
+    # LC 50. Pow(x, n)
     # TC: O(logN), SC: O(logN). The max depth of recursive stack is logN.
     def myPow(self, x: float, n: int) -> float:
         def helper(x, n):
@@ -732,3 +732,172 @@ class Solution:
                 tmp = helper(x, n // 2)
                 return tmp * tmp
         return helper(x, n)
+
+    # LC 56. Merge Intervals
+    # TC: O(NlogN), SC: O(logN) or O(N), quick sort
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort()
+        res = [intervals[0]]
+        for i in range(1, len(intervals)):
+            if intervals[i][0] <= res[-1][1]:
+                res[-1][1] = max(res[-1][1], intervals[i][1])
+            else:
+                res.append(intervals[i])
+        return res
+
+    # LC 34. Find First and Last Position of Element in Sorted Array
+    # TC: O(logN), SC: O(1)
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        def find_first(nums, begin, end, target):
+            left = begin
+            right = end
+            while left < right:
+                mid = left + (right - left) // 2
+                if nums[mid] < target:
+                    left = mid + 1
+                elif nums[mid] == target:
+                    right = mid
+                else:
+                    right = mid - 1
+            
+            if nums[left] == target:
+                return left
+            return -1
+        
+        def find_last(nums, begin, end, target):
+            left = begin
+            right = end
+            while left < right - 1:
+                mid = left + (right - left) // 2
+                if nums[mid] > target:
+                    right = mid - 1
+                elif nums[mid] == target:
+                    left = mid
+                else:
+                    left = mid + 1
+            if nums[right] == target:
+                return right
+            elif nums[left] == target:
+                return left
+            else:
+                return -1
+        
+        if not nums:
+            return [-1, -1]
+        first = find_first(nums, 0, len(nums) - 1, target)
+        last = find_last(nums, 0, len(nums) - 1, target)
+        return [first, last]
+
+    # LC 1091. Shortest Path in Binary Matrix 
+    # TC: O(N) SC: O(1)
+    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+        if grid is None or len(grid) == 0 or len(grid[0]) == 0:
+            return -1
+        if grid[0][0] != 0 or grid[-1][-1] != 0:
+            return -1
+        m = len(grid)
+        n = len(grid[0])
+        queue = deque()
+        queue.append((0,0))
+        grid[0][0] = 1
+        dirs = [(1,0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        res = 1
+        while queue:
+            r, c = queue.popleft()
+            dist = grid[r][c]
+            if r == m - 1 and c == n - 1:
+                return dist
+            for dr, dc in dirs:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < m and 0 <= nc < n and grid[nr][nc] == 0:
+                    queue.append((nr, nc))
+                    grid[nr][nc] = dist + 1
+                    if nr == m - 1 and nc == n - 1:
+                        return grid[nr][nc]
+
+        return -1
+
+    # LC 199. Binary Tree Right Side View
+    # TC: O(N), SC: O(N)
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        q = deque()
+        res = []
+        if root:
+            q.append(root)
+        node = None
+        while q:
+            for i in range(len(q)):
+                node = q.popleft()
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+            res.append(node.val)
+        return res
+
+    # LC Basic Calculator II
+    # TC: O(N), SC: O(N)
+    def calculate(self, s: str) -> int:
+        stack = deque()
+        pre_sign = "+"
+        num = 0
+        i = 0
+        while i < len(s):
+            if s[i].isdigit():
+                num = num * 10 + int(s[i])
+            if i == len(s) - 1 or s[i] in "+-*/":
+                if pre_sign == "+":
+                    stack.append(num)
+                elif pre_sign == "-":
+                    stack.append(-num)
+                elif pre_sign == "*":
+                    stack.append(stack.pop() * num)
+                elif pre_sign == "/":
+                    stack.append(int(stack.pop() / num))
+                pre_sign = s[i]
+                num = 0
+            i += 1
+        return sum(stack)
+
+    # LC 347. Top K Frequent Elements
+    # TC: O(Nlogk), SC: O(k)
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+        counts = Counter(nums)
+        pq = []
+        for val, cnt in counts.items():
+            heapq.heappush(pq, (cnt, val))
+            if len(pq) > k:
+                heapq.heappop(pq)
+        return [x[1] for x in pq]
+
+
+    # LC 339. Nested List Weight Sum
+    # TC: O(N), SC: O(D). N is the total number of nested elements in the input list. D is the max depth of the input list
+    def depthSum(self, nestedList: List[NestedInteger]) -> int:
+        def helper(nested_list, depth):
+            total = 0
+            for nested in nested_list:
+                if nested.isInteger():
+                    total += nested.getInteger() * depth
+                else:
+                    total += helper(nested.getList(), depth + 1)
+            return total
+        
+        return helper(nestedList, 1)
+
+    # LC 560. Subarray Sum Equals K
+    # TC: O(N), SC: O(N)
+    # prefix sum + hashmap
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        sum_dict = defaultdict(int)
+        count = 0
+        sums = [0] * (len(nums))
+        pre_sum = 0
+        sum_dict[pre_sum] += 1
+        for i in range(len(nums)):
+            sums[i] = pre_sum + nums[i]
+            pre_sum = sums[i]
+            if sums[i] - k in sum_dict:
+                count += sum_dict[sums[i] - k]
+            sum_dict[pre_sum] += 1
+        return count
