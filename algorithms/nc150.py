@@ -901,3 +901,229 @@ class Solution:
                 count += sum_dict[sums[i] - k]
             sum_dict[pre_sum] += 1
         return count
+
+    # LC 20. Valid Parentheses
+    # TC: O(N), SC: O(N)
+    def isValid(self, s: str) -> bool:
+        stack = deque()
+        for c in s:
+            if c in "([{":
+                stack.append(c)
+            elif c == ')':
+                if stack and stack.pop() == '(':
+                    continue
+                else:
+                    return False
+            elif c == "]":
+                if stack and stack.pop() == "[":
+                    continue
+                else:
+                    return False
+            elif c == "}":
+                if stack and stack.pop() == "{":
+                    continue
+                else:
+                    return False
+        return True if len(stack) == 0 else False
+
+    # LC 150. Evaluate Reverse Polish Notation
+    # TC: O(N), SC: O(N),
+    def evalRPN(self, tokens: List[str]) -> int:
+        stack = deque()
+        for cur in tokens:
+            if cur in "+-*/":
+                x2 = stack.pop()
+                x1 = stack.pop()
+                if cur == "+":
+                    res = x1 + x2
+                elif cur == "-":
+                    res = x1 - x2
+                elif cur == "*":
+                    res = x1 * x2
+                elif cur == "/":
+                    res = int(x1 / x2)
+                stack.append(res)
+            else:
+                stack.append(int(cur))
+        return stack[0]  
+
+    # LC 739. Daily Temperatures
+    # TC: O(N), SC: O(N)
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        if not temperatures:
+            return []
+        n = len(temperatures)
+        res = [0] * n
+        stack = [] # save the index of temperature that has not found a warmer one.
+        for i, temp in enumerate(temperatures):
+            while stack and temp > temperatures[stack[-1]]:
+                pre_idx = stack.pop()
+                res[pre_idx] = i - pre_idx
+            stack.append(i)
+        return res
+
+    # LC 853. Car Fleet
+    # TC: O(NlogN), SC: O(N)
+    def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
+        
+        cars = sorted(zip(position, speed), reverse=True)
+        time = [(target - p) / s for p, s in cars]
+        stack = []
+        for t in time:
+            if not stack or t > stack[-1]:
+                stack.append(t)
+        return len(stack)
+
+    # LC 994. Rotting Oranges
+    # TC: O(N), SC: O(1)
+    # BFS
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        if not grid or not grid[0]:
+            return -1
+        que = deque()
+        fresh = 0
+        m = len(grid)
+        n = len(grid[0])
+        for i in range(m):
+            for j in range(n):
+                if grid[i][j] == 2:
+                    que.append((i, j))
+                elif grid[i][j] == 1:
+                    fresh += 1
+        res = 0
+        dirs = [(-1, 0), (1, 0), (0, 1), (0, -1)]
+        while que and fresh > 0:
+            for i in range(len(que)):
+                x, y = que.popleft()
+                for dx, dy in dirs:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < m and 0 <= ny < n and grid[nx][ny] == 1:
+                        que.append((nx, ny))
+                        grid[nx][ny] = 2
+                        fresh -= 1
+            if len(que):
+                res += 1
+
+        return res if fresh == 0 else -1
+
+    # LC 402. Remove K Digits
+    # TC: O(N), SC: O(N)
+    # stack
+    def removeKdigits(self, num: str, k: int) -> str:
+        stack = []
+        remain = len(num) - k
+        for digit in num:
+            while k and stack and stack[-1] > digit:
+                stack.pop()
+                k -= 1
+            stack.append(digit)
+        res = ''.join(stack[:remain]).lstrip('0')
+        return res if res else '0'
+
+    # LC 316. Remove Duplicate Letters
+    # TC: O(N), SC: O(N)
+    # stack
+    def removeDuplicateLetters(self, s: str) -> str:
+        stack = []
+        remain = Counter(s)
+        in_stack = set()
+
+        for c in s:
+            if c not in in_stack:
+                while stack and c < stack[-1] and remain[stack[-1]] > 0:
+                    in_stack.remove(stack.pop())
+                stack.append(c)
+                in_stack.add(c)
+            remain[c] -= 1
+        return ''.join(stack)
+
+    # LC 74. Search a 2D Matrix
+    # TC: O(logN), SC: O(N)
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        if matrix is None or len(matrix) == 0 or len(matrix[0]) == 0:
+            return False
+        m = len(matrix)
+        n = len(matrix[0])
+        left = 0
+        right = m * n - 1
+        while left <= right:
+            mid = left + (right - left) // 2
+            row = mid // n
+            col = mid % n
+            if matrix[row][col] < target:
+                left = mid + 1
+            elif matrix[row][col] > target:
+                right = mid - 1
+            else:
+                return True
+        return False
+
+    # LC 153. Find Minimum in Rotated Sorted Array
+    # TC: O(N), SC: O(1)
+    # compare mid with the right element, and we can conclude whether the min value is on the left or right of mid
+    def findMin(self, nums: List[int]) -> int:
+        left = 0
+        right = len(nums) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if nums[mid] <= nums[right]:
+                right = mid
+            elif nums[mid] > nums[right]:
+                left = mid + 1
+        return nums[left]
+
+    # LC 
+    # TC: O(log(N+M)), SC: O(logk)
+    # recursive
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        def kth_helper(A, a_left, B, b_left, k):
+            if a_left >= len(A):
+                return B[b_left + k - 1]
+            elif b_left >= len(B):
+                return A[a_left + k - 1]
+            elif k == 1:
+                return min(A[a_left], B[b_left])
+            
+            a_half_idx = a_left + k // 2 - 1
+            a_half_val = A[a_half_idx] if a_half_idx < len(A) else float("inf")
+
+            b_half_idx = b_left + k // 2 - 1
+            b_half_val = B[b_half_idx] if b_half_idx < len(B) else float("inf")
+
+            if a_half_val < b_half_val:
+                return kth_helper(A, a_half_idx + 1, B, b_left, k - k // 2)
+            else:
+                return kth_helper(A, a_left, B, b_half_idx + 1, k - k // 2)
+        
+        total = len(nums1) + len(nums2)
+        if total % 2:
+            return kth_helper(nums1, 0, nums2, 0, total // 2 + 1)
+        else:
+            return (kth_helper(nums1, 0, nums2, 0, total // 2 ) + kth_helper(nums1, 0, nums2, 0, total // 2 + 1)) / 2
+    # iterative
+    def kth(A, B, k):
+            a_left, b_left = 0, 0
+            while a_left < len(A) and b_left < len(B) and k > 1:
+                a_half_idx = a_left + k // 2 - 1
+                a_half_val = A[a_half_idx] if a_half_idx < len(A) else float("inf")
+                b_half_idx = b_left + k // 2 - 1
+                b_half_val = B[b_half_idx] if b_half_idx < len(B) else float("inf")
+
+                if a_half_val < b_half_val:
+                    a_left = a_half_idx + 1
+                else:
+                    b_left = b_half_idx + 1
+                k -= k//2
+            if a_left >= len(A):
+                return B[b_left + k - 1]
+            elif b_left >= len(B):
+                return A[a_left + k - 1]
+            return min(A[a_left], B[b_left])
+        
+        total = len(nums1) + len(nums2)
+        if total % 2:
+            return kth(nums1, nums2, total // 2 + 1)
+        else:
+            first = kth(nums1, nums2, total // 2)
+            second = kth(nums1, nums2, total //2 + 1)
+            return (first + second) / 2
