@@ -1100,7 +1100,7 @@ class Solution:
             return kth_helper(nums1, 0, nums2, 0, total // 2 + 1)
         else:
             return (kth_helper(nums1, 0, nums2, 0, total // 2 ) + kth_helper(nums1, 0, nums2, 0, total // 2 + 1)) / 2
-    # iterative
+    # iterative SC: O(1)
     def kth(A, B, k):
             a_left, b_left = 0, 0
             while a_left < len(A) and b_left < len(B) and k > 1:
@@ -1127,3 +1127,207 @@ class Solution:
             first = kth(nums1, nums2, total // 2)
             second = kth(nums1, nums2, total //2 + 1)
             return (first + second) / 2
+
+    # LC 206. Reverse Linked List
+    # Definition for singly-linked list.
+    # class ListNode:
+    #     def __init__(self, val=0, next=None):
+    #         self.val = val
+    #         self.next = next
+    # Iterative TC: O(N), SC: O(1)
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        dummy = ListNode()
+        dummy.next = None
+        cur = head
+        while cur:
+            nxt = cur.next
+            cur.next = dummy.next
+            dummy.next = cur
+            cur = nxt
+        return dummy.next
+    # Recursive TC: O(N), SC: O(N)
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        def helper(head):
+            if not head or not head.next:
+                return head
+            new_head = helper(head.next)
+            head.next.next = head
+            head.next = None
+            return new_head
+        return helper(head)
+
+    # LC 21. Merge Two Sorted Lists
+    # TC: O(N+M), SC: O(1)
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        dummy = ListNode()
+        cur = dummy
+        while list1 and list2:
+            if list1.val <= list2.val:
+                cur.next = list1
+                list1 = list1.next
+            else:
+                cur.next = list2
+                list2 = list2.next
+            cur = cur.next
+        if list1:
+            cur.next = list1
+        elif list2:
+            cur.next = list2
+        return dummy.next
+
+    # LC 141. Linked List Cycle
+    # TC: O(N), SC: O(1)
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        if not head or not head.next:
+            return False
+        fast, slow = head, head
+        while fast.next and fast.next.next:
+            fast = fast.next.next
+            slow = slow.next
+            if fast == slow:
+                return True
+        return False
+
+    # LC 19. Remove Nth Node From End of List
+    # TC: O(N), SC: O(1)
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        dummy = ListNode()
+        dummy.next = head
+        cur = head
+        total = 0
+        while cur:
+            total += 1
+            cur = cur.next
+        cur = dummy
+        for i in range(total - n):
+            cur = cur.next
+        cur.next = cur.next.next
+        return dummy.next
+
+    # LC 138. Copy List with Random Pointer
+    # TC: O(N), SC: O(N)
+    # Iterative
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        if not head:
+            return None
+        visited = {}
+        cur = head
+        while cur:
+            if cur not in visited:
+                cur_copy = Node(cur.val)
+                visited[cur] = cur_copy
+            cur_copy = visited[cur]
+            if cur.next:
+                if cur.next not in visited:
+                    next_copy = Node(cur.next.val)
+                    visited[cur.next] = next_copy
+                cur_copy.next = visited[cur.next]
+            if cur.random:
+                if cur.random not in visited:
+                    rand_copy = Node(cur.random.val)
+                    visited[cur.random] = rand_copy
+                cur_copy.random = visited[cur.random]
+
+            cur = cur.next
+        return visited[head]
+    # Recursive
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        def dfs(head, visited):
+            if not head:
+                return head
+            if head in visited:
+                return visited[head]
+            cur_copy = Node(head.val)
+            visited[head] = cur_copy
+            next_copy = dfs(head.next, visited)
+            cur_copy.next = next_copy
+            rand_copy = dfs(head.random, visited)
+            cur_copy.random = rand_copy
+
+            return cur_copy
+
+        visited = {}
+        return dfs(head, visited)
+
+    # LC 2. Add Two Numbers
+    # TC: O(max(M, N)), SC:O(Max(M, N))
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        dummy = ListNode()
+        cur = dummy
+        carry = 0
+        while l1 and l2:
+            cur_sum = l1.val + l2.val + carry
+            node = ListNode(cur_sum % 10)
+            carry = cur_sum // 10
+            cur.next = node
+            cur = cur.next
+            l1 = l1.next
+            l2 = l2.next
+        while l1:
+            cur_sum = l1.val + carry
+            node = ListNode(cur_sum % 10)
+            carry = cur_sum // 10
+            cur.next = node
+            cur = cur.next
+            l1 = l1.next
+        while l2:
+            cur_sum = l2.val + carry
+            node = ListNode(cur_sum % 10)
+            carry = cur_sum // 10
+            cur.next = node
+            cur = cur.next
+            l2 = l2.next
+        if carry:
+            node = ListNode(carry)
+            cur.next = node
+        return dummy.next
+
+    # LC 23. Merge k Sorted Lists
+    # TC: O(N), SC: O(k)
+    # Definition for singly-linked list.
+    # class ListNode:
+    #     def __init__(self, val=0, next=None):
+    #         self.val = val
+    #         self.next = next
+    class NodeCmp:
+        def __init__(self, node):
+            self.node = node
+        
+        def __lt__(self, other):
+            return self.node.val < other.node.val
+
+    class Solution:    
+        def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+            dummy = ListNode()
+            pq = []
+            for i in range(len(lists)):
+                if lists[i]:
+                    heapq.heappush(pq, NodeCmp(lists[i]))
+            cur = dummy
+            while pq:
+                node_cmp = heapq.heappop(pq)
+                cur.next = node_cmp.node
+                cur = cur.next
+                if cur.next:
+                    heapq.heappush(pq, NodeCmp(cur.next))
+            return dummy.next
+        
+    # LC 25. Reverse Nodes in k-Group
+    # TC: O(N), SC:O(n/k)
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        def dfs(head, k):
+            cur = head
+            for i in range(k):
+                if not cur:
+                    return head
+                cur = cur.next
+            dummy = ListNode(0)
+            dummy.next = dfs(cur, k)
+            for i in range(k):
+                nxt = head.next
+                head.next = dummy.next
+                dummy.next = head
+                head = nxt
+            return dummy.next
+        return dfs(head, k)
+        
