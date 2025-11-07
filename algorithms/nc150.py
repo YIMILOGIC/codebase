@@ -1331,3 +1331,130 @@ class Solution:
             return dummy.next
         return dfs(head, k)
         
+    # LC 226. Invert Binary Tree
+    # TC: O(N), SC: O(Height)
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        def dfs(root):
+            if not root:
+                return root
+            root.left, root.right = root.right, root.left
+            dfs(root.left)
+            dfs(root.right)
+            return root
+        return dfs(root)
+
+    # LC 110. Balanced Binary Tree
+    # TC: O(N^2), SC: O(N)
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        def height(root):
+            if not root:
+                return True
+            return max(height(root.left), height(root.right)) + 1
+        
+        def dfs(root):
+            if not root:
+                return True
+            hl = height(root.left)
+            hr = height(root.right)
+            if abs(hl - hr) > 1:
+                return False
+            return dfs(root.left) and dfs(root.right)
+        return dfs(root)
+    # TC: O(N^2), SC: O(N)
+    def dfs(root):
+            if not root:
+                return [True, 0]
+            lres = dfs(root.left)
+            rres = dfs(root.right)
+            is_balanced = lres[0] and rres[0] and abs(lres[1] - rres[1]) < 2
+            return [is_balanced, max(lres[1], rres[1]) + 1]
+        return dfs(root)[0]
+
+    # LC 104. Maximum Depth of Binary Tree
+    # TC: O(N), SC: O(Height)
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        def dfs(root):
+            if not root:
+                return 0
+            return max(dfs(root.left), dfs(root.right)) + 1
+        return dfs(root)
+    
+    # LC 100. Same Tree
+    # TC: O(N), SC: O(Height)
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        def dfs(p, q):
+            if not p and not q:
+                return True
+            elif not p or not q:
+                return False
+            else:
+                if p.val != q.val:
+                    return False
+                else:
+                    return dfs(p.left, q.left) and dfs(p.right, q.right)
+        return dfs(p, q)
+
+    # LC 235. Lowest Common Ancestor of a Binary Search Tree
+    # TC: O(N), SC: O(Height)
+    # both p and q are in the BST.
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def dfs(root, p, q):
+            if p.val < root.val and q.val < root.val:
+                return dfs(root.left, p, q)
+            elif p.val > root.val and q.val > root.val:
+                return dfs(root.right, p, q)
+            else:
+                return root
+        return dfs(root, p, q)
+
+    # LC 102. Binary Tree Level Order Traversal
+    # TC: O(N), SC: O(N)
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        res = []
+        if not root:
+            return []
+        que = deque()
+        que.append(root)
+        while que:
+            cur_res = []
+            for i in range(len(que)):
+                cur_node = que.popleft()
+                cur_res.append(cur_node.val)
+                if cur_node.left:
+                    que.append(cur_node.left)
+                if cur_node.right:
+                    que.append(cur_node.right)
+            res.append(cur_res)
+        return res
+
+    # LC 572. Subtree of Another Tree
+    # TC: O(N+M), SC: O(N+M)
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        def get_height(root):
+            if not root:
+                return 0
+            return max(get_height(root.left), get_height(root.right)) + 1
+
+        def is_same_tree(p, q):
+            if not p and not q:
+                return True
+            elif not p or not q:
+                return False
+            else:
+                if p.val != q.val:
+                    return False
+                else:
+                    return is_same_tree(p.left, q.left) and is_same_tree(p.right, q.right)
+        
+        def is_sub_tree(p, q):
+            hq = get_height(q)
+            if not p:
+                return 0, False
+            left_h, left_found = is_sub_tree(p.left, q)
+            right_h, right_found = is_sub_tree(p.right, q)
+            if left_found or right_found:
+                return 0, True
+            node_h = max(left_h, right_h) + 1
+            return node_h, node_h == hq and is_same_tree(p, q)
+        
+        return is_sub_tree(root, subRoot)[1]
