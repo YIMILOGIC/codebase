@@ -907,23 +907,17 @@ class Solution:
     def isValid(self, s: str) -> bool:
         stack = deque()
         for c in s:
-            if c in "([{":
+            if c in "{([":
                 stack.append(c)
-            elif c == ')':
-                if stack and stack.pop() == '(':
-                    continue
-                else:
-                    return False
-            elif c == "]":
-                if stack and stack.pop() == "[":
-                    continue
-                else:
-                    return False
-            elif c == "}":
-                if stack and stack.pop() == "{":
-                    continue
-                else:
-                    return False
+                continue
+            elif c == ")" and stack and stack.pop() == "(":
+                continue
+            elif c == "}" and stack and stack.pop() == "{":
+                continue
+            elif c == "]" and stack and stack.pop() == "[":
+                continue
+            else:
+                return False
         return True if len(stack) == 0 else False
 
     # LC 150. Evaluate Reverse Polish Notation
@@ -1458,3 +1452,56 @@ class Solution:
             return node_h, node_h == hq and is_same_tree(p, q)
         
         return is_sub_tree(root, subRoot)[1]
+
+    # LC 199. Binary Tree Right Side View
+    # TC: O(N), SC: O(N)
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        if not root:
+            return res
+        que = deque()
+        que.append(root)
+        while que:
+            cur_node = None
+            for i in range(len(que)):
+                cur_node = que.popleft()
+                if cur_node.left:
+                    que.append(cur_node.left)
+                if cur_node.right:
+                    que.append(cur_node.right)
+            res.append(cur_node.val)
+        return res
+
+    # LC 1448. Count Good Nodes in Binary Tree
+    # TC: O(N), SC: O(Height)
+    def goodNodes(self, root: TreeNode) -> int:
+        def dfs(root, max_val, res):
+            if not root:
+                return
+            if max_val <= root.val:
+                res[0] += 1
+            max_val = max(max_val, root.val)
+            if root.left:
+                dfs(root.left, max_val, res)
+            if root.right:
+                dfs(root.right, max_val, res)
+        
+        res = [0]
+        dfs(root, root.val, res)
+        return res[0]
+
+    # LC 230. Kth Smallest Element in a BST
+    # TC: O(N) SC:O(Height)
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        def dfs(root, cur, res, k):
+            if not root or cur[0] >= k:
+                return
+            dfs(root.left, cur, res, k)
+            cur[0] += 1
+            if cur[0] == k:
+                res[0] = root.val
+            dfs(root.right, cur, res, k)
+        res = [-1]
+        cur = [0]
+        dfs(root, cur, res, k)
+        return res[0]
