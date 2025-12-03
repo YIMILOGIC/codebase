@@ -1505,3 +1505,14 @@ class Solution:
         cur = [0]
         dfs(root, cur, res, k)
         return res[0]
+
+    # LC 98. Validate Binary Search Tree
+    # TC: O(N), SC: O(Height)
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        def dfs(root, min_val, max_val):
+            if not root:
+                return True
+            if root.val >= max_val or root.val <= min_val:
+                return False
+            return dfs(root.left, min_val, root.val) and dfs(root.right, root.val, max_val)
+        return dfs(root, float("-inf"), float("inf"))
