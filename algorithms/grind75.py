@@ -98,3 +98,36 @@ class Solution:
         for c in t:
             tgt_dict[c] += 1
         return src_dict == tgt_dict
+
+    def isAnagram2(self, s: str, t: str) -> bool:
+        if s is None and t is None:
+            return True
+        elif s is None or t is None:
+            return False
+        elif len(s) != len(t):
+            return False
+        
+        counter = DefaultDict(int)
+        for c in s:
+            counter[c] += 1
+        for c in t:
+            counter[c] -= 1
+        for c in counter:
+            if counter[c] != 0:
+                return False
+        return True
+    # 704. Binary Search
+    # TC: O(logN), SC: O(1)
+    def search(self, nums: List[int], target: int) -> int:
+        if not nums:
+            return -1
+        left, right = 0, len(nums) - 1
+        while left <= right:
+            mid = left + (right - left) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return -1
