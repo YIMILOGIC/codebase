@@ -1,3 +1,6 @@
+import java.util.HashMap;
+import java.util.Map;
+
 class Solution {
     public boolean isAnagram(String s, String t) {
         if (s == null && t == null){

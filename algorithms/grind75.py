@@ -131,3 +131,25 @@ class Solution:
             else:
                 right = mid - 1
         return -1
+
+    # 733. Flood Fill
+    # TC: O(N), SC: O(N)
+    def floodFill(self, image: List[List[int]], sr: int, sc: int, color: int) -> List[List[int]]:
+        if not image or not image[0]:
+            return image
+        m = len(image)
+        n = len(image[0])
+        if image[sr][sc] == color:
+            return image
+        queue = deque()
+        queue.append((sr, sc))
+        pre_color = image[sr][sc]
+        DIRECTIONS = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+        while queue:
+            cur_r, cur_c = queue.popleft()
+            image[cur_r][cur_c] = color
+            for dr, dc in DIRECTIONS:
+                new_r, new_c = cur_r + dr, cur_c + dc
+                if 0 <= new_r < m and 0 <= new_c < n and image[new_r][new_c] == pre_color:
+                    queue.append((new_r, new_c))
+        return image
