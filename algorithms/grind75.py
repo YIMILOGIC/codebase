@@ -153,3 +153,31 @@ class Solution:
                 if 0 <= new_r < m and 0 <= new_c < n and image[new_r][new_c] == pre_color:
                     queue.append((new_r, new_c))
         return image
+
+    # 235. Lowest Common Ancestor of a Binary Search Tree
+    # TC: O(N), SC: O(H)
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def dfs(root, p, q):
+            if not root:
+                return None
+            if p.val < root.val and q.val < root.val:
+                return dfs(root.left, p, q)
+            elif p.val > root.val and q.val > root.val:
+                return dfs(root.right, p, q)
+            else:
+                return root
+        return dfs(root, p, q)
+
+    # 110. Balanced Binary Tree
+    # TC: O(N), SC: O(H)
+    def isBalanced(self, root: Optional[TreeNode]) -> bool:
+        def dfs(root):
+            if not root:
+                return True, 0
+            left_balanced, left_height = dfs(root.left)
+            right_balanced, right_height = dfs(root.right)
+            cur_height = max(left_height, right_height) + 1
+            cur_balanced = left_balanced and right_balanced and abs(left_height - right_height) < 2
+            return cur_balanced, cur_height
+        return dfs(root)[0]
+
